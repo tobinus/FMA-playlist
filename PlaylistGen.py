@@ -1,6 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-from urllib.request import urlopen
+from urllib2 import urlopen
 import json
 import random
 from settings import API_KEY
@@ -31,7 +31,7 @@ BASE_URL = 'https://freemusicarchive.org/api/get/tracks.json'
 URL = '{base}?{settings}&api_key={api_key}'.format(base=BASE_URL, settings='&'.join(SETTINGS), api_key=API_KEY)
 
 file = urlopen(URL)
-data = file.readall().decode('utf-8')
+data = file.read()
 file.close()
 
 data = json.loads(data)
@@ -45,6 +45,6 @@ with open('playlist.m3u8', 'w') as f:
     for track in tracks:
         f.write('\n#EXTINF:{duration}, {artist} - {title}\n'.format(
             duration = convert_duration(track['track_duration']),
-            artist = track['artist_name'],
-            title = track['track_title']))
+            artist = track['artist_name'].encode('utf-8', errors='replace'),
+            title = track['track_title'].encode('utf-8', errors='replace')))
         f.write('{url}/download\n'.format(url=track['track_url']))
