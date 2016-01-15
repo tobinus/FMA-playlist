@@ -3,6 +3,7 @@
 from urllib.request import urlopen
 import json
 import random
+from settings import API_KEY
 
 def convert_duration(duration):
     try:
@@ -17,15 +18,13 @@ def convert_duration(duration):
     except:
         return 42
 
-API_KEY = '3T5ZTK9OOH36XO4F'
 SETTINGS = [
     'limit=1000',
     'sort_by=track_interest',
     'sort_dir=desc',
     'commercial=1',
-    'min_duration=00:01:00',
+    'min_duration=00:01:30',
     'max_duration=00:10:00'
-
 ]
 BASE_URL = 'https://freemusicarchive.org/api/get/tracks.json'
 
