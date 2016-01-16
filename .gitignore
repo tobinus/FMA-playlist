@@ -2,3 +2,4 @@ settings.py
 .DS_Store
 *.pyc
 tracks/
+log.log
