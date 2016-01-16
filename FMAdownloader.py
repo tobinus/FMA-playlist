@@ -26,9 +26,9 @@ s.close()
 for track in tracks:
     path = 'tracks/{file}'.format(file=track['track_file'].split('/')[-1])
     if isfile(path):
-        print 'Already got {title}'.format(title=track['track_title'])
+        print 'Already got {title}'.format(title=track['track_title'].encode('utf-8', errors='replace'))
         continue
-    print 'Downloading {title}'.format(title=track['track_title'])
+    print 'Downloading {title}'.format(title=track['track_title'].encode('utf-8', errors='replace'))
     f = open(path, "wb")
     try:
         s = urlopen('{url}/download'.format(url=track['track_url']))
