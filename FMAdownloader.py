@@ -23,9 +23,10 @@ tracks = loads(s.read())['dataset']
 s.close()
 
 for track in tracks:
-    path = 'tracks/{}'.format(track['track_file'].split('/')[-1])
+    print 'Downloading {title}'.format(title=track['track_title'])
+    path = 'tracks/{file}'.format(file=track['track_file'].split('/')[-1])
     if isfile(path): continue
     with open(path, "wb") as f:
-        s = urlopen('{}/download'.format(track['track_url']))
+        s = urlopen('{url}/download'.format(url=track['track_url']))
         f.write(s.read())
         s.close()
