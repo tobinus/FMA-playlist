@@ -3,6 +3,7 @@
 from urllib2 import urlopen
 from json import loads
 from os.path import isfile
+from os import remove
 from settings import API_KEY
 
 SETTINGS = [
@@ -26,7 +27,14 @@ for track in tracks:
     print 'Downloading {title}'.format(title=track['track_title'])
     path = 'tracks/{file}'.format(file=track['track_file'].split('/')[-1])
     if isfile(path): continue
-    with open(path, "wb") as f:
+    f = open(path, "wb")
+    try:
         s = urlopen('{url}/download'.format(url=track['track_url']))
         f.write(s.read())
+    except:
+        f.close()
+        remove(path)
+        print 'Error while downloading, removed track'
+    finally:
         s.close()
+    f.close()
