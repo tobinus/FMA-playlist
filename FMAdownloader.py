@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-from urllib2 import urlopen
+from urllib2 import Request, urlopen
+import urllib2
 from json import loads
 from os.path import isfile
 from os import remove
@@ -19,7 +20,9 @@ BASE_URL = 'https://freemusicarchive.org/api/get/tracks.json'
 
 URL = '{base}?{settings}&api_key={api_key}'.format(base=BASE_URL, settings='&'.join(SETTINGS), api_key=API_KEY)
 
-s = urlopen(URL)
+headers = {'User-Agent' : 'FMA-playlist 0.1'}
+req = Request(URL, None, headers)
+s = urlopen(req)
 tracks = loads(s.read())['dataset']
 s.close()
 
@@ -31,7 +34,8 @@ for track in tracks:
     print 'Downloading {title}'.format(title=track['track_title'].encode('utf-8', errors='replace'))
     f = open(path, "wb")
     try:
-        s = urlopen('{url}/download'.format(url=track['track_url']))
+        url = '{url}/download'.format(url=track['track_url'])
+        s = urlopen(Request(url, None, headers))
         f.write(s.read())
     except:
         f.close()
