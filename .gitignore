@@ -3,3 +3,4 @@ settings.py
 *.pyc
 tracks/
 log.log
+*.swp
