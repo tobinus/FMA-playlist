@@ -10,6 +10,8 @@ except ImportError:
 from json import loads
 from os.path import isfile
 from os import remove
+from math import log10
+
 from settings import API_KEY
 
 SETTINGS = [
@@ -34,7 +36,7 @@ s.close()
 # Keep track of how many iterations we must make
 n = len(tracks)
 # Number of digits to use, so the progress indication has the same length
-number_width = str((n // 10) + 1)
+number_width = str(int(log10(n)) + 1)
 
 for i, track in enumerate(tracks):
     filename = track['track_file'].split('/')[-1]
