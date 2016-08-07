@@ -8,8 +8,8 @@ except ImportError:
     # Fall back to Python2
     from urllib2 import Request, urlopen
 from json import loads
-from os.path import isfile
-from os import remove
+from os.path import isfile, basename
+from os import remove, listdir
 from math import log10
 
 from settings import API_KEY
@@ -33,32 +33,102 @@ s = urlopen(req)
 tracks = loads(s.read().decode('windows-1252'))['dataset']
 s.close()
 
-# Keep track of how many iterations we must make
-n = len(tracks)
-# Number of digits to use, so the progress indication has the same length
-number_width = str(int(log10(n)) + 1)
+# What tracks must be downloaded?
+top_track_filenames = set(
+    [
+    track['track_file'].split('/')[-1]
+    for track in tracks
+    ]
+)
+existing_tracks = set(
+    [
+    basename(filename)
+    for filename in listdir('tracks')
+    if isfile('tracks/' + filename) and not filename == '.dummy'
+    ]
+)
+existing_downloaded_tracks = set(
+    [
+    basename(filename)
+    for filename in listdir('downloaded_tracks')
+    if isfile('downloaded_tracks/' + filename) and not filename == '.dummy'
+    ]
+)
 
-for i, track in enumerate(tracks):
-    filename = track['track_file'].split('/')[-1]
-    path = 'tracks/{file}'.format(file=filename)
-    download_path = 'downloaded_tracks/{file}'.format(file=filename)
+already_downloaded = existing_tracks | existing_downloaded_tracks
+to_be_downloaded = top_track_filenames - already_downloaded
 
-    # Print progress indication
-    print(('{i:0' + number_width + '}/{n:0' + number_width + '} ').format(i=i+1, n=n), end="")
+tracks_to_be_removed = existing_tracks - top_track_filenames
+downloaded_tracks_to_be_removed = existing_downloaded_tracks -\
+    top_track_filenames
 
-    if isfile(path) or isfile(download_path):
-        print('Already got {title}'.format(title=track['track_title']))
-        continue
-    print('Downloading {title}'.format(title=track['track_title']))
-    f = open(download_path, "wb")
-    try:
-        url = '{url}/download'.format(url=track['track_url'])
-        s = urlopen(Request(url, None, headers))
-        f.write(s.read())
-    except:
+# Get list with all information about the tracks, not just their filenames
+tracks_to_download = [
+    track
+    for track in tracks
+    if track['track_file'].split('/')[-1] in to_be_downloaded
+]
+
+if tracks_to_download:
+    # Keep track of how many iterations we must make
+    n = len(tracks_to_download)
+    # Number of digits to use, so the progress indication has the same length
+    number_width = str(int(log10(n)) + 1)
+
+    # Download the new tracks
+    for i, track in enumerate(tracks_to_download):
+        filename = track['track_file'].split('/')[-1]
+        path = 'tracks/{file}'.format(file=filename)
+        download_path = 'downloaded_tracks/{file}'.format(file=filename)
+
+        # Print progress indication
+        print(('{i:0' + number_width + '}/{n:0' + number_width + '} ').format(i=i+1, n=n), end="")
+
+        if isfile(path) or isfile(download_path):
+            # This should never be executed, but just in case we end up
+            # running in parallel and someone else downloaded it before us,
+            # it doesn't hurt to check
+            print('Already got {title}'.format(title=track['track_title']))
+            continue
+        print('Downloading {title}'.format(title=track['track_title']))
+        f = open(download_path, "wb")
+        try:
+            url = '{url}/download'.format(url=track['track_url'])
+            s = urlopen(Request(url, None, headers))
+            f.write(s.read())
+        except:
+            f.close()
+            remove(download_path)
+            print('Error while downloading, removed track')
+        finally:
+            s.close()
         f.close()
-        remove(download_path)
-        print('Error while downloading, removed track')
-    finally:
-        s.close()
-    f.close()
+else:
+    print("No tracks to download.")
+
+# Remove old tracks
+paths_to_remove = [
+    'tracks/{file}'.format(file=filename)
+    for filename in tracks_to_be_removed
+]
+paths_to_remove.extend([
+    'downloaded_tracks/{file}'.format(file=filename)
+    for filename in downloaded_tracks_to_be_removed
+])
+
+if paths_to_remove:
+    n = len(paths_to_remove)
+    number_width = str(int(log10(n)) + 1)
+
+    print("\nRemoving tracks that are no longer part of the search")
+
+    for i, path in enumerate(paths_to_remove):
+        print(('{i:0' + number_width + '}/{n:0' + number_width + '} ' +
+            'Removing {path}').format(i=i+1, n=n, path=path))
+        try:
+            remove(path)
+        except:
+            print('Error while removing')
+else:
+    print("No tracks to remove.")
+
