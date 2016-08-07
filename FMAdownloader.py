@@ -99,7 +99,8 @@ if tracks_to_download:
         except:
             f.close()
             remove(download_path)
-            print('Error while downloading, removed track')
+            print('Error while downloading {url}, removed track'
+                .format(url=track['track_url']))
         finally:
             s.close()
         f.close()

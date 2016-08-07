@@ -20,10 +20,15 @@ somewhat familiar with Linux.
 
 2.  Clone this repository and `cd` into it.
 
-3.  Customize your criteria by editing `FMAdownloader.py`. By default, the top
+3.  Remove the .dummy files; they're there just so the folder is included in
+    the repository.
+
+    `rm tracks/.dummy downloaded_tracks/.dummy`
+
+4.  Customize your criteria by editing `FMAdownloader.py`. By default, the top
     1000 tracks available for commercial use are chosen.
 
-4.  Run the program for the first time.
+5.  Run the program for the first time.
 
     `make run`
 
@@ -37,7 +42,7 @@ somewhat familiar with Linux.
     (so we're not a burden for FMA). After that, they will have silence 
     removed from either end of them before they're moved to `tracks/`.
 
-5.  Optional: to add new tracks as the search result changes over time, add
+6.  Optional: to add new tracks as the search result changes over time, add
     `make run` to your crontab.
 
     `crontab -e`
